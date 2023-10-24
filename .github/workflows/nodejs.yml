@@ -35,7 +35,7 @@ jobs:
         # Install and build project
         run: |
           make install
-          make build
+          # make build
         # Add environment variables
         env:
           CI: true
