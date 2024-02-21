@@ -9,3 +9,5 @@
 
 ### Integration status:
 [![.github/workflows/nodejs.yml](https://github.com/SplitCode/frontend-project-11/actions/workflows/nodejs.yml/badge.svg)](https://github.com/SplitCode/frontend-project-11/actions/workflows/nodejs.yml)
+
+[Link to RSS-agregator](https://rss-reader-splitcode.vercel.app/)
