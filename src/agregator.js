@@ -1,44 +1,13 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
-
-const schema = yup.object().shape({
-  url: yup.string().trim().url().required('Ссылка должна быть валидным URL'),
-});
-
-const render = (elements, watchedState) => {
-  const { form } = watchedState;
-
-  switch (form.process) {
-    case 'sent':
-      // elements.inputUrl.classList.remove('is-invalid');
-      console.log('sent');
-      break;
-
-    case 'error':
-      elements.inputUrl.classList.add('is-invalid');
-      console.log('error');
-      break;
-
-    case 'sending':
-      // elements.inputUrl.classList.remove('is-invalid');
-      console.log('sending');
-      break;
-
-    case 'filling':
-      // elements.inputUrl.classList.remove('is-invalid');
-      console.log('filling');
-      break;
-
-    default:
-      throw new Error(`Unknown process state: ${form.process}`);
-  }
-};
+import updateUI from './view.js';
 
 const app = () => {
   const elements = {
     form: document.querySelector('.rss-form'),
     submit: document.querySelector('button[type="submit"]'),
     inputUrl: document.querySelector('[name="url"]'),
+    feedback: document.querySelector('.feedback'),
   };
 
   const initialState = {
@@ -46,33 +15,40 @@ const app = () => {
       valid: true,
       url: '',
       process: 'filling',
+      errors: [],
+      links: [],
     },
-    errors: null,
   };
 
-  const watchedState = onChange(initialState, render(elements, initialState));
+  const watchedState = onChange(initialState, updateUI(elements, initialState));
 
-  elements.form.addEventListener('submit', async (e) => {
+  elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    watchedState.form.process = 'sending';
     const formData = new FormData(e.target);
-    const url = formData.get('url');
+    const value = formData.get('url');
 
-    try {
-      await schema.validate({ url });
-      watchedState.errors = null;
-      watchedState.form.process = 'sent';
+    const schema = yup.string()
+      .url('Ссылка должна быть валидным URL')
+      .notOneOf(watchedState.form.links, 'RSS уже существует')
+      .trim();
 
-      // watchedState.feeds.push(value);
-      watchedState.form.url = '';
-      elements.inputUrl.classList.remove('is-invalid');
-      elements.inputUrl.focus();
-      render(elements, watchedState);
-    } catch (error) {
-      watchedState.errors = error.message;
-      watchedState.form.process = 'error';
-      render(elements, watchedState);
-    }
+    watchedState.form.process = 'filling';
+
+    schema.validate(value)
+      .then(() => {
+        watchedState.form.valid = true;
+        watchedState.form.process = 'sending';
+        watchedState.form.links.push(value);
+        watchedState.form.process = 'sent';
+      })
+      .catch((error) => {
+        watchedState.form.valid = false;
+        watchedState.form.errors = error.message;
+        watchedState.form.process = 'failed';
+      })
+      .finally(() => {
+        watchedState.form.process = 'filling';
+      });
   });
 };
 
