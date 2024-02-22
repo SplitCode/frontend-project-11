@@ -47,8 +47,7 @@ const app = () => {
     const formData = new FormData(e.target);
     const value = formData.get('url');
 
-    const schema = yup.string()
-      .url(i18nInstance.t('errors.errorUrl')).notOneOf(watchedState.form.links, i18nInstance.t('errors.doubleUrl')).trim();
+    const schema = yup.string().url().trim().required();
 
     watchedState.form.process = 'filling';
 
