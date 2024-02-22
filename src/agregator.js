@@ -1,8 +1,28 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
+import i18n from 'i18next';
+import ru from './locales/ru.js';
 import updateUI from './view.js';
 
+yup.setLocale({
+  mixed: {
+    notOneOf: 'RSS уже существует',
+  },
+  string: {
+    url: 'Ссылка должна быть валидным URL',
+  },
+});
+
 const app = () => {
+  const defaultLanguage = 'ru';
+  const i18nInstance = i18n.createInstance();
+  i18nInstance.init({
+    lng: defaultLanguage,
+    resources: {
+      ru,
+    },
+  });
+
   const elements = {
     form: document.querySelector('.rss-form'),
     submit: document.querySelector('button[type="submit"]'),
@@ -20,7 +40,7 @@ const app = () => {
     },
   };
 
-  const watchedState = onChange(initialState, updateUI(elements, initialState));
+  const watchedState = onChange(initialState, updateUI(elements, initialState, i18nInstance));
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -28,9 +48,7 @@ const app = () => {
     const value = formData.get('url');
 
     const schema = yup.string()
-      .url('Ссылка должна быть валидным URL')
-      .notOneOf(watchedState.form.links, 'RSS уже существует')
-      .trim();
+      .url(i18nInstance.t('errors.errorUrl')).notOneOf(watchedState.form.links, i18nInstance.t('errors.doubleUrl')).trim();
 
     watchedState.form.process = 'filling';
 

@@ -1,4 +1,4 @@
-const handleValidationError = (elements, error) => {
+const handleError = (elements, error) => {
   const { inputUrl, feedback } = elements;
   inputUrl.classList.remove('is-valid');
   inputUrl.classList.add('is-invalid');
@@ -9,24 +9,24 @@ const handleValidationError = (elements, error) => {
   elements.form.reset();
 };
 
-const handleSuccess = (elements) => {
+const handleSuccess = (elements, i18nInstance) => {
   const { inputUrl, feedback } = elements;
   inputUrl.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
-  feedback.textContent = 'RSS успешно загружен';
+  feedback.textContent = i18nInstance.t('successUrl');
   inputUrl.focus();
   elements.form.reset();
 };
 
-const updateUI = (elements, state) => (path, value) => {
+const updateUI = (elements, state, i18nInstance) => (path, value) => {
   switch (path) {
     case 'form.process':
       if (value === 'failed') {
-        handleValidationError(elements, state.form.errors);
+        handleError(elements, state.form.errors);
       }
       if (value === 'sent') {
-        handleSuccess(elements);
+        handleSuccess(elements, i18nInstance);
       }
       break;
     default:
