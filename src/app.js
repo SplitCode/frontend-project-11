@@ -1,33 +1,26 @@
+import axios from 'axios';
 import * as yup from 'yup';
-import onChange from 'on-change';
 import i18n from 'i18next';
-import ru from './locales/ru.js';
-import updateUI from './view.js';
+import resources from './locales/ru.js';
 
-yup.setLocale({
-  mixed: {
-    notOneOf: 'RSS уже существует',
-  },
-  string: {
-    url: 'Ссылка должна быть валидным URL',
-  },
-});
+import updateUI from './view.js';
 
 const app = () => {
   const defaultLanguage = 'ru';
   const i18nInstance = i18n.createInstance();
   i18nInstance.init({
     lng: defaultLanguage,
-    resources: {
-      ru,
-    },
+    debug: false,
+    resources,
   });
 
   const elements = {
     form: document.querySelector('.rss-form'),
-    submit: document.querySelector('button[type="submit"]'),
     inputUrl: document.querySelector('[name="url"]'),
+    submit: document.querySelector('button[type="submit"]'),
     feedback: document.querySelector('.feedback'),
+    posts: document.querySelector('.posts'),
+    feeds: document.querySelector('.feeds'),
   };
 
   const initialState = {
@@ -44,6 +37,7 @@ const app = () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
+
     const formData = new FormData(e.target);
     const value = formData.get('url');
 

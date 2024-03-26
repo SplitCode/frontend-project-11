@@ -14,7 +14,7 @@ const handleSuccess = (elements, i18nInstance) => {
   inputUrl.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.classList.add('text-success');
-  feedback.textContent = i18nInstance.t('successUrl');
+  feedback.textContent = i18nInstance.t('success.successUrl');
   inputUrl.focus();
   elements.form.reset();
 };
