@@ -1,45 +1,55 @@
-import axios from 'axios';
+import onChange from 'on-change';
 import * as yup from 'yup';
-import i18n from 'i18next';
+import axios from 'axios';
+import i18next from 'i18next';
+import _ from 'lodash';
 import resources from './locales/ru.js';
-
 import updateUI from './view.js';
+import parser from './parser.js';
 
 const app = () => {
-  const defaultLanguage = 'ru';
-  const i18nInstance = i18n.createInstance();
-  i18nInstance.init({
-    lng: defaultLanguage,
-    debug: false,
-    resources,
-  });
+  const initialState = {
+    form: {
+      valid: true,
+      error: null,
+      state: '',
+    },
+    posts: [],
+    feeds: [],
+  };
 
   const elements = {
     form: document.querySelector('.rss-form'),
-    inputUrl: document.querySelector('[name="url"]'),
+    input: document.querySelector('.rss-form input'),
     submit: document.querySelector('button[type="submit"]'),
     feedback: document.querySelector('.feedback'),
     posts: document.querySelector('.posts'),
     feeds: document.querySelector('.feeds'),
   };
 
-  const initialState = {
-    form: {
-      valid: true,
-      url: '',
-      process: 'filling',
-      errors: [],
-      links: [],
-    },
-  };
+  const i18nextInstance = i18next.createInstance();
+  i18nextInstance.init({
+    lng: 'ru',
+    debug: false,
+    resources,
+  }).then(() => {
+    yup.setLocale({
+      mixed: {
+        notOneOf: () => ({ key: 'errors.doubleUrl' }),
+      },
+      string: {
+        url: () => ({ key: 'errors.errorUrl' }),
+      },
+    });
+  })
 
-  const watchedState = onChange(initialState, updateUI(elements, initialState, i18nInstance));
+  const watchedState = watch(initialState, elements, i18nextInstance);
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const value = formData.get('url');
+    const dataUrl = formData.get('url');
 
     const schema = yup.string().url().trim().required();
 

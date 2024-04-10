@@ -1,7 +1,5 @@
 import './styles.scss';
 import 'bootstrap';
-import app from './agregator.js';
+import app from './app.js';
 
 app();
-
-console.log('Hello, Carrot!');
