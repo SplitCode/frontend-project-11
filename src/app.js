@@ -165,7 +165,7 @@ const app = () => {
         watchedState.form.valid = 'invalid';
         if (error.message === 'Network Error') {
           watchedState.errors = i18Instance.t('errors.networkError');
-        } else if ((error.message === 'invalidUrl')) {
+        } else if (error.message === 'invalidUrl') {
           watchedState.errors = i18Instance.t('errors.invalidUrl');
         } else {
           watchedState.errors = error.message;

@@ -1,7 +1,6 @@
-// import { createElement, createLink, createButton } from "./utils.js";
 import createButton from './utils.js';
 
-const handleError = (elem, err) => {
+const handleFormError = (elem, err) => {
   const elements = { ...elem };
   elements.input.classList.replace('is-valid', 'is-invalid');
   elements.feedback.classList.replace('text-success', 'text-danger');
@@ -11,7 +10,7 @@ const handleError = (elem, err) => {
   elements.submitButton.removeAttribute('disabled');
 };
 
-const handleFinishError = (elem, i18Instance) => {
+const handleFormSuccess = (elem, i18Instance) => {
   const elements = { ...elem };
   elements.input.classList.replace('is-invalid', 'is-valid');
   elements.feedback.classList.replace('text-danger', 'text-success');
@@ -38,7 +37,7 @@ const renderModalWindow = (elem, posts) => {
   return result;
 };
 
-const makeCardContainer = (elem, titleName, i18Instance) => {
+const createCardContainer = (elem, titleName, i18Instance) => {
   const elements = { ...elem };
   elements[titleName].textContent = '';
 
@@ -58,7 +57,8 @@ const makeCardContainer = (elem, titleName, i18Instance) => {
   return card;
 };
 
-const makeFeedsList = (state, card) => {
+const createFeedsList = (state, elements, i18Instance) => {
+  const feedsContainer = createCardContainer(elements, 'feeds', i18Instance);
   const feedList = document.createElement('ul');
   feedList.classList.add('list-group', 'border-0', 'rounded-0');
 
@@ -75,10 +75,11 @@ const makeFeedsList = (state, card) => {
     feedList.append(feedItem);
   });
 
-  card.append(feedList);
+  feedsContainer.append(feedList);
 };
 
-const makePostsList = (state, card, i18Instance) => {
+const createPostsList = (state, elements, i18Instance) => {
+  const postsContainer = createCardContainer(elements, 'posts', i18Instance);
   const postList = document.createElement('ul');
   postList.classList.add('list-group', 'border-0', 'rounded-0');
 
@@ -106,39 +107,42 @@ const makePostsList = (state, card, i18Instance) => {
     postList.append(postItem);
   });
 
-  card.append(postList);
+  postsContainer.append(postList);
+};
+
+const handleFormStatus = (value, elements, state, i18Instance) => {
+  switch (value) {
+    case 'failed':
+      handleFormError(elements, state.errors);
+      break;
+    case 'sent':
+      handleFormSuccess(elements, i18Instance);
+      break;
+    case 'sending':
+      elements.submitButton.setAttribute('disabled', true);
+      break;
+    case 'filling':
+      elements.submitButton.removeAttribute('disabled');
+      break;
+    default:
+      break;
+  }
 };
 
 const updateUI = (state, elements, i18Instance) => (path, value) => {
   switch (path) {
     case 'form.status':
-      if (value === 'failed') {
-        handleError(elements, state.errors);
-      }
-      if (value === 'sent') {
-        handleFinishError(elements, i18Instance);
-      }
-      if (value === 'sending') {
-        elements.submitButton.setAttribute('disabled', true);
-      }
-      if (value === 'filling') {
-        elements.submitButton.removeAttribute('disabled');
-      }
+      handleFormStatus(value, elements, state, i18Instance);
       break;
-    case 'feeds': {
-      const feedsContainer = makeCardContainer(elements, 'feeds', i18Instance);
-      makeFeedsList(state, feedsContainer);
+    case 'feeds':
+      createFeedsList(state, elements, i18Instance);
       break;
-    }
-    case 'posts': {
-      const postsContainer = makeCardContainer(elements, 'posts', i18Instance);
-      makePostsList(state, postsContainer, i18Instance);
+    case 'posts':
+      createPostsList(state, elements, i18Instance);
       break;
-    }
-    case 'readPost': {
+    case 'readPost':
       renderModalWindow(elements, value);
       break;
-    }
     default:
       break;
   }
