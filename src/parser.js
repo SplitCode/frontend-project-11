@@ -1,30 +1,30 @@
-import _ from 'lodash';
-
-const RSSParser = (data) => {
+export default (request) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(data, 'application/xml');
-  const rss = document.querySelector('rss');
-  if (!doc.contains(rss)) {
-    const error = new Error('is parser error');
-    error.isParserError = true;
-    throw error;
-  }
-  const feed = {};
-  feed.title = rss.querySelector('title').textContent;
-  feed.description = rss.querySelector('description').textContent;
-  const items = document.querySelectorAll('item');
-  const posts = Array.from(items).map((item) => {
-    const post = {};
-    const title = item.querySelector('title');
-    const link = item.querySelector('link');
-    const description = item.querySelector('description');
-    post.title = title.textContent;
-    post.link = link.textContent;
-    post.description = description.textContent;
-    post.id = _.uniqueId();
-    return post;
-  });
-  return { feed, posts };
-};
+  const doc = parser.parseFromString(request.data.contents, 'application/xml');
 
-export default RSSParser;
+  const errorNode = doc.querySelector('parsererror');
+  if (errorNode) {
+    throw new Error('invalidUrl');
+  } else {
+    const channel = doc.querySelector('channel');
+    const titleChannel = doc.querySelector('channel title').textContent;
+    const descriptionChannel = doc.querySelector(
+      'channel description',
+    ).textContent;
+    const feed = { titleChannel, descriptionChannel };
+
+    const itemElements = channel.getElementsByTagName('item');
+    const posts = [...itemElements].map((item) => {
+      const title = item.querySelector('title').textContent;
+      const description = item.querySelector('description').textContent;
+      const link = item.querySelector('channel link').textContent;
+      return {
+        title,
+        description,
+        link,
+      };
+    });
+    const rss = { feed, posts };
+    return Promise.resolve(rss);
+  }
+};

@@ -5,7 +5,7 @@ export default {
       doubleUrl: 'RSS уже существует',
       invalidUrl: 'Ресурс не содержит валидный RSS',
       emptyUrl: 'Не должно быть пустым',
-      networkEr: 'Ошибка сети',
+      networkError: 'Ошибка сети',
     },
     success: {
       successUrl: 'RSS успешно загружен',
