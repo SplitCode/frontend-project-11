@@ -1,4 +1,5 @@
 // import { createElement, createLink, createButton } from "./utils.js";
+import createButton from './utils.js';
 
 const handleError = (elem, err) => {
   const elements = { ...elem };
@@ -99,13 +100,7 @@ const makePostsList = (state, card, i18Instance) => {
     link.setAttribute('href', post.link);
     link.textContent = post.title;
 
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-    button.dataset.id = post.id;
-    button.dataset.bsToggle = 'modal';
-    button.dataset.bsTarget = '#modal';
-    button.textContent = i18Instance.t('button.view');
+    const button = createButton(post.id, i18Instance);
 
     postItem.append(link, button);
     postList.append(postItem);
