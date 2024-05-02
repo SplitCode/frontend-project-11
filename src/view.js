@@ -29,7 +29,7 @@ const handleFinishError = (elem, i18Instance) => {
   elements.feedback.classList.replace('text-danger', 'text-success');
   // feedback.classList.remove('text-success');
   // feedback.classList.add('text-danger');
-  elements.feedback.textContent = i18Instance.t('successUrl');
+  elements.feedback.textContent = i18Instance.t('success.successUrl');
   elements.input.focus();
   elements.form.reset();
   elements.submitButton.removeAttribute('disabled');

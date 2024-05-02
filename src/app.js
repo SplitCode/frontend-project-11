@@ -3,7 +3,7 @@ import * as yup from 'yup';
 import axios from 'axios';
 import i18next from 'i18next';
 import { uniqueId } from 'lodash';
-import resources from './locales/ru.js';
+import ru from './locales/ru.js';
 // import ru from './locales/ru.js';
 import updateUI from './view.js';
 // import render from './view.js';
@@ -121,7 +121,9 @@ const app = () => {
     .init({
       lng: 'ru',
       debug: false,
-      resources,
+      resources: {
+        ru,
+      },
     })
     .then(() => {
       yup.setLocale({
