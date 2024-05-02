@@ -2,17 +2,9 @@
 
 const handleError = (elem, err) => {
   const elements = { ...elem };
-  // const {
-  //   input, feedback, form, submit,
-  // } = elem;
   elements.input.classList.replace('is-valid', 'is-invalid');
-  // input.classList.remove('is-valid');
-  // input.classList.add('is-invalid');
   elements.feedback.classList.replace('text-success', 'text-danger');
-  // feedback.classList.remove('text-success');
-  // feedback.classList.add('text-danger');
   elements.feedback.textContent = err;
-  // feedback.textContent = JSON.stringify(err);
   elements.input.focus();
   elements.form.reset();
   elements.submitButton.removeAttribute('disabled');
@@ -20,15 +12,8 @@ const handleError = (elem, err) => {
 
 const handleFinishError = (elem, i18Instance) => {
   const elements = { ...elem };
-  // const {
-  //   input, feedback, form, submit,
-  // } = elem;
   elements.input.classList.replace('is-invalid', 'is-valid');
-  // input.classList.remove('is-valid');
-  // input.classList.add('is-invalid');
   elements.feedback.classList.replace('text-danger', 'text-success');
-  // feedback.classList.remove('text-success');
-  // feedback.classList.add('text-danger');
   elements.feedback.textContent = i18Instance.t('success.successUrl');
   elements.input.focus();
   elements.form.reset();
@@ -37,7 +22,6 @@ const handleFinishError = (elem, i18Instance) => {
 
 const renderModalWindow = (elem, posts) => {
   const elements = { ...elem };
-  // const { modalTitle, modalDescription, modalLink } = elem;
   const result = posts.forEach((post) => {
     const {
       title, description, link, id,
@@ -46,14 +30,14 @@ const renderModalWindow = (elem, posts) => {
     elements.modalDescription.textContent = description;
     elements.modalButton.setAttribute('href', link);
 
-    const linkDom = document.querySelector(`[data-id="${id}"]`); // change style of text
+    const linkDom = document.querySelector(`[data-id="${id}"]`);
     linkDom.classList.remove('fw-bold');
     linkDom.classList.add('fw-normal', 'text-muted');
   });
   return result;
 };
 
-const makeContainer = (elem, state, titleName, i18Instance) => {
+const makeCardContainer = (elem, titleName, i18Instance) => {
   const elements = { ...elem };
   elements[titleName].textContent = '';
 
@@ -63,69 +47,74 @@ const makeContainer = (elem, state, titleName, i18Instance) => {
   const cardBody = document.createElement('div');
   cardBody.classList.add('card-body');
 
-  const h2 = document.createElement('h2');
-  h2.classList.add('card-title', 'h4');
-  h2.textContent = i18Instance.t(titleName);
-  cardBody.append(h2);
+  const cardTitle = document.createElement('h2');
+  cardTitle.classList.add('card-title', 'h4');
+  cardTitle.textContent = i18Instance.t(`content.${titleName}`);
+  cardBody.append(cardTitle);
   card.append(cardBody);
   elements[titleName].append(card);
 
-  const ul = document.createElement('ul');
-  ul.classList.add('list-group', 'border-0', 'rounded-0');
+  return card;
+};
 
-  if (titleName === 'feeds') {
-    state.feeds.forEach((feed) => {
-      const li = document.createElement('li');
-      li.classList.add('list-group-item', 'border-0', 'border-end-0');
-      const h3 = document.createElement('h3');
-      h3.classList.add('h6', 'm-0');
-      h3.textContent = feed.feedTitle;
-      const p = document.createElement('p');
-      p.classList.add('m-0', 'small', 'text-black-50');
-      p.textContent = feed.feedDescription;
-      li.append(h3, p);
-      ul.append(li);
-    });
-    card.append(ul);
-  }
-  if (titleName === 'posts') {
-    state.posts.forEach((post) => {
-      const li = document.createElement('li');
-      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-      const a = document.createElement('a');
+const makeFeedsList = (state, card) => {
+  const feedList = document.createElement('ul');
+  feedList.classList.add('list-group', 'border-0', 'rounded-0');
 
-      if (state.readPost.find((redPost) => redPost.id === post.id)) {
-        a.classList.remove('fw-bold');
-        a.classList.add('fw-normal', 'text-muted');
-      } else {
-        a.classList.add('fw-bold');
-      }
+  state.feeds.forEach((feed) => {
+    const feedItem = document.createElement('li');
+    feedItem.classList.add('list-group-item', 'border-0', 'border-end-0');
+    const feedTitle = document.createElement('h3');
+    feedTitle.classList.add('h6', 'm-0');
+    feedTitle.textContent = feed.feedTitle;
+    const feedDescription = document.createElement('p');
+    feedDescription.classList.add('m-0', 'small', 'text-black-50');
+    feedDescription.textContent = feed.feedDescription;
+    feedItem.append(feedTitle, feedDescription);
+    feedList.append(feedItem);
+  });
 
-      a.dataset.id = post.id;
-      a.setAttribute('target', '_blank');
-      a.setAttribute('rel', 'noopener noreferrer');
+  card.append(feedList);
+};
 
-      a.setAttribute('href', post.link);
-      a.textContent = post.title;
+const makePostsList = (state, card, i18Instance) => {
+  const postList = document.createElement('ul');
+  postList.classList.add('list-group', 'border-0', 'rounded-0');
 
-      const button = document.createElement('button');
-      button.setAttribute('type', 'button');
-      button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-      button.dataset.id = post.id;
-      button.dataset.bsToggle = 'modal';
-      button.dataset.bsTarget = '#modal';
-      button.textContent = i18Instance.t('button.view');
+  state.posts.forEach((post) => {
+    const postItem = document.createElement('li');
+    postItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+    const link = document.createElement('a');
 
-      li.append(a, button);
-      ul.append(li);
-    });
-    card.append(ul);
-  }
+    if (state.readPost.find((redPost) => redPost.id === post.id)) {
+      link.classList.remove('fw-bold');
+      link.classList.add('fw-normal', 'text-muted');
+    } else {
+      link.classList.add('fw-bold');
+    }
+
+    link.dataset.id = post.id;
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+    link.setAttribute('href', post.link);
+    link.textContent = post.title;
+
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    button.dataset.id = post.id;
+    button.dataset.bsToggle = 'modal';
+    button.dataset.bsTarget = '#modal';
+    button.textContent = i18Instance.t('button.view');
+
+    postItem.append(link, button);
+    postList.append(postItem);
+  });
+
+  card.append(postList);
 };
 
 const updateUI = (state, elements, i18Instance) => (path, value) => {
-  // const { submit } = elements;
-
   switch (path) {
     case 'form.status':
       if (value === 'failed') {
@@ -142,11 +131,13 @@ const updateUI = (state, elements, i18Instance) => (path, value) => {
       }
       break;
     case 'feeds': {
-      makeContainer(elements, state, 'feeds', i18Instance);
+      const feedsContainer = makeCardContainer(elements, 'feeds', i18Instance);
+      makeFeedsList(state, feedsContainer);
       break;
     }
     case 'posts': {
-      makeContainer(elements, state, 'posts', i18Instance);
+      const postsContainer = makeCardContainer(elements, 'posts', i18Instance);
+      makePostsList(state, postsContainer, i18Instance);
       break;
     }
     case 'readPost': {

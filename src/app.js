@@ -4,12 +4,24 @@ import axios from 'axios';
 import i18next from 'i18next';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
-// import ru from './locales/ru.js';
 import updateUI from './view.js';
-// import render from './view.js';
 import parser from './parser.js';
 
 const delay = 5000;
+
+const initialState = {
+  form: {
+    field: '',
+    status: 'filling',
+    valid: 'valid',
+    addedLinks: [],
+  },
+  errors: null,
+  posts: [],
+  feeds: [],
+  readPost: [],
+  activePost: null,
+};
 
 const getAxiosResponse = (link) => {
   const url = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
@@ -100,20 +112,6 @@ const app = () => {
     modalTitle: document.querySelector('.modal-title'),
     modalDescription: document.querySelector('.modal-body'),
     modalButton: document.querySelector('.full-article'),
-  };
-
-  const initialState = {
-    form: {
-      field: '',
-      status: 'filling',
-      valid: 'valid',
-      addedLinks: [],
-    },
-    errors: null,
-    posts: [],
-    feeds: [],
-    readPost: [],
-    activePost: null,
   };
 
   const i18Instance = i18next.createInstance();
