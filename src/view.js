@@ -114,7 +114,7 @@ const makeContainer = (elem, state, titleName, i18Instance) => {
       button.dataset.id = post.id;
       button.dataset.bsToggle = 'modal';
       button.dataset.bsTarget = '#modal';
-      button.textContent = i18Instance.t('show');
+      button.textContent = i18Instance.t('button.view');
 
       li.append(a, button);
       ul.append(li);
