@@ -8,9 +8,7 @@ export default (request) => {
   } else {
     const channel = doc.querySelector('channel');
     const titleChannel = doc.querySelector('channel title').textContent;
-    const descriptionChannel = doc.querySelector(
-      'channel description',
-    ).textContent;
+    const descriptionChannel = doc.querySelector('channel description').textContent;
     const feed = { titleChannel, descriptionChannel };
 
     const itemElements = channel.getElementsByTagName('item');

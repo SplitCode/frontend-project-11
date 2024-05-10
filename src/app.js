@@ -73,12 +73,14 @@ const updatePosts = (state, time) => {
   const existPosts = stateCopy.posts;
   const { feeds } = stateCopy;
 
-  const feedPromises = feeds.map((feed) => getAxiosResponse(feed.feedLink)
-    .then((data) => parser(data))
-    .then((parseData) => createPost(parseData.posts))
-    .catch((error) => {
-      stateCopy.errors = error.message;
-    }));
+  const feedPromises = feeds.map((feed) =>
+    getAxiosResponse(feed.feedLink)
+      .then((data) => parser(data))
+      .then((parseData) => createPost(parseData.posts))
+      .catch((error) => {
+        stateCopy.errors = error.message;
+      }),
+  );
   Promise.all(feedPromises)
     .then((posts) => {
       const newPosts = posts.flat();
@@ -134,10 +136,7 @@ const app = () => {
       });
     });
 
-  const watchedState = onChange(
-    initialState,
-    updateUI(initialState, elements, i18Instance),
-  );
+  const watchedState = onChange(initialState, updateUI(initialState, elements, i18Instance));
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
