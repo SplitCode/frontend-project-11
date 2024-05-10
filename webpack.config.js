@@ -1,21 +1,21 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
-
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import { fileURLToPath } from 'url';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 const config = {
-  entry: path.resolve(__dirname, './src/index.js'),
+  entry: './src/index.js',
   output: {
-    filename: '[name].[contenthash].js',
-    path: path.resolve(__dirname, './dist/'),
-    clean: true,
+    path: path.resolve(dirname, 'dist'),
   },
   devServer: {
-    open: true,
+    open: false,
     host: 'localhost',
+    port: 3000,
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -25,35 +25,21 @@ const config = {
       filename: '[name].[contenthash].css',
       chunkFilename: '[id].[contenthash].css',
     }),
-
-    // Add your plugins here
-    // Learn more about plugins from https://webpack.js.org/configuration/plugins/
   ],
   module: {
     rules: [
-      {
-        test: /\.(js|jsx)$/i,
-        loader: 'babel-loader',
-      },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
         type: 'asset',
       },
       {
-        test: /\.css$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        test: /\.scss$/i,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
         type: 'asset/resource',
       },
-      {
-        test: /\.scss$/i,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
-      },
-
-      // Add your rules for custom modules here
-      // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
 };
