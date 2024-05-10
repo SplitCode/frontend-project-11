@@ -1,11 +1,10 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 
-const path = require('path');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import path from 'path';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
-// eslint-disable-next-line eqeqeq
-const isProduction = process.env.NODE_ENV == 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const config = {
   entry: path.resolve(__dirname, './src/index.js'),
@@ -21,6 +20,10 @@ const config = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[name].[contenthash].css',
+      chunkFilename: '[id].[contenthash].css',
     }),
 
     // Add your plugins here
@@ -38,7 +41,7 @@ const config = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/i,
@@ -55,7 +58,7 @@ const config = {
   },
 };
 
-module.exports = () => {
+export default () => {
   if (isProduction) {
     config.mode = 'production';
   } else {
