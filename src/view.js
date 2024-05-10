@@ -23,7 +23,9 @@ const handleFormSuccess = (elem, i18Instance) => {
 const renderModalWindow = (elem, posts) => {
   const elements = { ...elem };
   const result = posts.forEach((post) => {
-    const { title, description, link, id } = post;
+    const {
+      title, description, link, id,
+    } = post;
     elements.modalTitle.textContent = title;
     elements.modalDescription.textContent = description;
     elements.modalButton.setAttribute('href', link);
