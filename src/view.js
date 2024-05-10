@@ -5,19 +5,21 @@ const handleFormError = (elem, err) => {
   elements.input.classList.replace('is-valid', 'is-invalid');
   elements.feedback.classList.replace('text-success', 'text-danger');
   elements.feedback.textContent = err;
-  elements.input.focus();
-  elements.form.reset();
+  // elements.input.focus();
+  // elements.form.reset();
+  elements.input.removeAttribute('disabled');
   elements.submitButton.removeAttribute('disabled');
 };
 
 const handleFormSuccess = (elem, i18Instance) => {
   const elements = { ...elem };
-  elements.input.classList.replace('is-invalid', 'is-valid');
-  elements.feedback.classList.replace('text-danger', 'text-success');
   elements.feedback.textContent = i18Instance.t('success.successUrl');
+  elements.submitButton.removeAttribute('disabled');
+  elements.input.removeAttribute('disabled');
+  elements.feedback.classList.replace('text-danger', 'text-success');
+  elements.input.classList.replace('is-invalid', 'is-valid');
   elements.input.focus();
   elements.form.reset();
-  elements.submitButton.removeAttribute('disabled');
 };
 
 const renderModalWindow = (elem, posts) => {

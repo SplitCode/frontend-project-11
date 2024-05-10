@@ -141,10 +141,9 @@ const app = () => {
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
-    watchedState.form.status = 'sending';
     const formData = new FormData(e.target);
     const value = formData.get('url');
-    console.log(value);
+    watchedState.form.status = 'sending';
     validation(value, watchedState.form.addedLinks, i18Instance)
       .then((url) => getAxiosResponse(url))
       .then((response) => parser(response))
@@ -159,9 +158,11 @@ const app = () => {
         watchedState.form.addedLinks.push(value);
         watchedState.form.status = 'sent';
         watchedState.form.field = value;
+        // watchedState.form.field = '';
         updatePosts(watchedState, delay);
       })
       .catch((error) => {
+        // watchedState.form.field = value;
         watchedState.form.valid = 'invalid';
         if (error.message === 'Network Error') {
           watchedState.errors = i18Instance.t('errors.networkError');
