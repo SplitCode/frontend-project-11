@@ -5,8 +5,6 @@ const handleFormError = (elem, err) => {
   elements.input.classList.replace('is-valid', 'is-invalid');
   elements.feedback.classList.replace('text-success', 'text-danger');
   elements.feedback.textContent = err;
-  // elements.input.focus();
-  // elements.form.reset();
   elements.input.removeAttribute('disabled');
   elements.submitButton.removeAttribute('disabled');
 };
@@ -129,6 +127,7 @@ const handleFormStatus = (value, elements, state, i18Instance) => {
       break;
     case 'sending':
       elements.submitButton.setAttribute('disabled', true);
+      elements.input.setAttribute('disabled', true);
       break;
     case 'filling':
       elements.submitButton.removeAttribute('disabled');
