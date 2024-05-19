@@ -6,6 +6,7 @@ import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import updateUI from './view.js';
 import parser from './parser.js';
+import urlBuilder from './helpers.js';
 
 const delay = 5000;
 
@@ -24,7 +25,7 @@ const initialState = {
 };
 
 const getAxiosResponse = (link) => {
-  const url = `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(link)}`;
+  const url = urlBuilder(link);
   return axios.get(url, { timeout: 10000 });
 };
 
