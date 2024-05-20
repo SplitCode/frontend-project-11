@@ -12,32 +12,24 @@ const delay = 5000;
 
 const initialState = {
   form: {
-    field: '',
-    status: 'filling',
-    valid: 'valid',
-    addedLinks: [],
+    error: '',
+    status: '',
   },
-  errors: null,
-  posts: [],
+  loadingProcess: {
+    error: '',
+    status: '',
+  },
   feeds: [],
-  readPost: [],
-  activePost: null,
+  posts: [],
+  ui: {
+    id: null,
+    readPosts: new Set(),
+  },
 };
 
 const getAxiosResponse = (link) => {
   const url = urlBuilder(link);
   return axios.get(url, { timeout: 10000 });
-};
-
-const validation = (url, addedLinks, i18Instance) => {
-  const schema = yup
-    .string()
-    .trim()
-    .required(i18Instance.t('errors.emptyUrl'))
-    .url(i18Instance.t('errors.errorUrl'))
-    .notOneOf(addedLinks, i18Instance.t('errors.doubleUrl'))
-    .validate(url);
-  return schema;
 };
 
 const createFeed = (rss, value) => {
@@ -101,6 +93,14 @@ const updatePosts = (state, time) => {
     });
 };
 
+const validateUrl = (url, urls) => {
+  const schema = yup.string().url('errors.errorUrl').required('errors.emptyUrl').notOneOf(urls, 'errors.doubleUrl')
+  return schema
+    .validate(url)
+    .then(() => null)
+    .catch((error) => error.message);
+};
+
 const app = () => {
   const elements = {
     form: document.querySelector('.rss-form'),
@@ -119,74 +119,72 @@ const app = () => {
   i18Instance
     .init({
       lng: 'ru',
-      debug: false,
+      debug: true,
       resources: {
         ru,
       },
-    })
-    .then(() => {
-      yup.setLocale({
-        mixed: {
-          notOneOf: i18Instance.t('doubleUrl'),
-        },
-        string: {
-          url: i18Instance.t('errorUrl'),
-        },
+    }).then(() => {
+      const watchedState = onChange(initialState, updateUI(initialState, elements, i18Instance));
+      elements.form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const url = formData.get('url');
+        const urls = watchedState.feeds.map((feed) => feed.url);
+        watchedState.form.status = 'sending';
+        validateUrl(url, urls)
+          .then((error) => {
+            if (error) {
+              watchedState.form.error = error.message;
+              watchedState.form.status = 'failed';
+              return;
+            }
+            watchedState.form.error = '';
+            loadRss(url);
+          });
       });
     });
-
-  const watchedState = onChange(
-    initialState,
-    updateUI(initialState, elements, i18Instance),
-  );
-
-  elements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const value = formData.get('url');
-    watchedState.form.status = 'sending';
-    validation(value, watchedState.form.addedLinks, i18Instance)
-      .then((url) => getAxiosResponse(url))
-      .then((response) => parser(response))
-      .then((rss) => {
-        const feed = createFeed(rss.feed, value);
-        const posts = createPost(rss.posts);
-        watchedState.feeds.unshift(feed);
-        watchedState.posts = posts.concat(watchedState.posts);
-      })
-      .then(() => {
-        watchedState.form.valid = 'valid';
-        watchedState.form.addedLinks.push(value);
-        watchedState.form.status = 'sent';
-        watchedState.form.field = value;
-        updatePosts(watchedState, delay);
-      })
-      .catch((error) => {
-        watchedState.form.valid = 'invalid';
-        if (error.message === 'Network Error') {
-          watchedState.errors = i18Instance.t('errors.networkError');
-        } else if (error.message === 'invalidUrl') {
-          watchedState.errors = i18Instance.t('errors.invalidUrl');
-        } else {
-          watchedState.errors = error.message;
-        }
-        watchedState.form.status = 'failed';
-      })
-      .finally(() => {
-        watchedState.form.process = 'filling';
-      });
-  });
-
-  elements.posts.addEventListener('click', (e) => {
-    const idClick = e.target.dataset.id;
-    if (idClick) {
-      const selectPost = watchedState.posts.find((post) => idClick === post.id);
-      if (selectPost) {
-        watchedState.activePost = selectPost.id;
-        watchedState.readPost.push(selectPost);
-      }
-    }
-  });
 };
+
+//     .then((response) => parser(response))
+//     .then((rss) => {
+//       const feed = createFeed(rss.feed, value);
+//       const posts = createPost(rss.posts);
+//       watchedState.feeds.unshift(feed);
+//       watchedState.posts = posts.concat(watchedState.posts);
+//     })
+//     .then(() => {
+//       watchedState.form.valid = 'valid';
+//       watchedState.form.addedLinks.push(value);
+//       watchedState.form.status = 'sent';
+//       watchedState.form.field = value;
+//       updatePosts(watchedState, delay);
+//     })
+//     .catch((error) => {
+//       watchedState.form.valid = 'invalid';
+//       if (error.message === 'Network Error') {
+//         watchedState.errors = i18Instance.t('errors.networkError');
+//       } else if (error.message === 'invalidUrl') {
+//         watchedState.errors = i18Instance.t('errors.invalidUrl');
+//       } else {
+//         watchedState.errors = error.message;
+//       }
+//       watchedState.form.status = 'failed';
+//     })
+//     .finally(() => {
+//       watchedState.form.process = 'filling';
+//     });
+// });
+
+//   elements.posts.addEventListener('click', (e) => {
+//     const idClick = e.target.dataset.id;
+//     if (idClick) {
+//       const selectPost = watchedState.posts.find((post) => idClick === post.id);
+//       if (selectPost) {
+//         watchedState.activePost = selectPost.id;
+//         watchedState.readPost.push(selectPost);
+//       }
+//     }
+//   });
+// };
 
 export default app;
