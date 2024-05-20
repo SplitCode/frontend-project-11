@@ -3,7 +3,7 @@ import axios from 'axios';
 import i18next from 'i18next';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
-import parser from './parser.js';
+import parse from './parser.js';
 import urlBuilder from './helpers.js';
 import watch from './view.js';
 
@@ -60,13 +60,12 @@ const createPost = (newPosts) => {
   return posts;
 };
 
-const updatePosts = (state, time) => {
-  const stateCopy = { ...state };
-  const existPosts = stateCopy.posts;
-  const { feeds } = stateCopy;
+const updatePosts = (watchedState) => {
+  const { feeds } = watchedState;
 
-  const feedPromises = feeds.map((feed) => getAxiosResponse(feed.feedLink)
-    .then((data) => parser(data))
+  const feedPromises = feeds.map((feed) => getAxiosResponse(feed.url)
+    .then((response) => {
+      const { posts } = parser(data))
     .then((parseData) => createPost(parseData.posts))
     .catch((error) => {
       stateCopy.errors = error.message;
