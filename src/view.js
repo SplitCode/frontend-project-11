@@ -1,3 +1,4 @@
+import onChange from 'on-change';
 import createButton from './utils.js';
 
 const handleFormError = (elem, err) => {
@@ -156,4 +157,6 @@ const updateUI = (state, elements, i18Instance) => (path, value) => {
   }
 };
 
-export default updateUI;
+const watch = (state, elements, i18i) => onChange(state, updateUI(state, elements, i18i));
+
+export default watch;

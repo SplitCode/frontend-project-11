@@ -1,12 +1,11 @@
-import onChange from 'on-change';
 import * as yup from 'yup';
 import axios from 'axios';
 import i18next from 'i18next';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
-import updateUI from './view.js';
 import parser from './parser.js';
 import urlBuilder from './helpers.js';
+import watch from './view.js';
 
 const delay = 5000;
 
@@ -93,25 +92,6 @@ const updatePosts = (state, time) => {
     });
 };
 
-const loadRss = (watchedState, url) => {
-  const { loadingProcess } = watchedState;
-  getAxiosResponse().then((response) => {
-    const { feed, posts } = parse(response.data.contents);
-    feed.id = uniqueId();
-    feed.url = url;
-    const relatedPosts = posts.map((post) => ({
-      ...post,
-      feedId: feed.id,
-    }));
-    loadingProcess.status = 'succsess';
-    watchedState.feeds.unshift(feed);
-    watchedState.posts.unshift(...relatedPosts);
-  })
-    .catch((e) => {
-      loadingProcess.error = extractLoadingErrorMessage(e);
-      loadingProcess.status = 'failed';
-    });
-};
 
 // /     .then((response) => parser(response))
 //     .then((rss) => {
@@ -142,17 +122,6 @@ const loadRss = (watchedState, url) => {
 //       watchedState.form.process = 'filling';
 //     });
 // });
-
-
-
-
-
-
-
-
-
-
-
 
 const validateUrl = (url, urls) => {
   const schema = yup.string().url('errors.errorUrl').required('errors.emptyUrl').notOneOf(urls, 'errors.doubleUrl')
@@ -186,7 +155,7 @@ const app = () => {
       },
     })
     .then(() => {
-      const watchedState = onChange(initialState, updateUI(initialState, elements, i18Instance));
+      const watchedState = watch(initialState, elements, i18Instance);
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
