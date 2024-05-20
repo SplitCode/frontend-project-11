@@ -93,6 +93,67 @@ const updatePosts = (state, time) => {
     });
 };
 
+const loadRss = (watchedState, url) => {
+  const { loadingProcess } = watchedState;
+  getAxiosResponse().then((response) => {
+    const { feed, posts } = parse(response.data.contents);
+    feed.id = uniqueId();
+    feed.url = url;
+    const relatedPosts = posts.map((post) => ({
+      ...post,
+      feedId: feed.id,
+    }));
+    loadingProcess.status = 'succsess';
+    watchedState.feeds.unshift(feed);
+    watchedState.posts.unshift(...relatedPosts);
+  })
+    .catch((e) => {
+      loadingProcess.error = extractLoadingErrorMessage(e);
+      loadingProcess.status = 'failed';
+    });
+};
+
+// /     .then((response) => parser(response))
+//     .then((rss) => {
+//       const feed = createFeed(rss.feed, value);
+//       const posts = createPost(rss.posts);
+//       watchedState.feeds.unshift(feed);
+//       watchedState.posts = posts.concat(watchedState.posts);
+//     })
+//     .then(() => {
+//       watchedState.form.valid = 'valid';
+//       watchedState.form.addedLinks.push(value);
+//       watchedState.form.status = 'sent';
+//       watchedState.form.field = value;
+//       updatePosts(watchedState, delay);
+//     })
+//     .catch((error) => {
+//       watchedState.form.valid = 'invalid';
+//       if (error.message === 'Network Error') {
+//         watchedState.errors = i18Instance.t('errors.networkError');
+//       } else if (error.message === 'invalidUrl') {
+//         watchedState.errors = i18Instance.t('errors.invalidUrl');
+//       } else {
+//         watchedState.errors = error.message;
+//       }
+//       watchedState.form.status = 'failed';
+//     })
+//     .finally(() => {
+//       watchedState.form.process = 'filling';
+//     });
+// });
+
+
+
+
+
+
+
+
+
+
+
+
 const validateUrl = (url, urls) => {
   const schema = yup.string().url('errors.errorUrl').required('errors.emptyUrl').notOneOf(urls, 'errors.doubleUrl')
   return schema
@@ -123,7 +184,8 @@ const app = () => {
       resources: {
         ru,
       },
-    }).then(() => {
+    })
+    .then(() => {
       const watchedState = onChange(initialState, updateUI(initialState, elements, i18Instance));
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -131,10 +193,11 @@ const app = () => {
         const url = formData.get('url');
         const urls = watchedState.feeds.map((feed) => feed.url);
         watchedState.form.status = 'sending';
+
         validateUrl(url, urls)
           .then((error) => {
             if (error) {
-              watchedState.form.error = error.message;
+              watchedState.form.error = error;
               watchedState.form.status = 'failed';
               return;
             }
@@ -142,49 +205,17 @@ const app = () => {
             loadRss(url);
           });
       });
+
+      elements.posts.addEventListener('click', (e) => {
+        const { id } = e.target.dataset;
+        if (id) {
+          watchedState.ui.id = id;
+          watchedState.ui.readPosts.add(id);
+        }
+      });
+
+      updatePosts(watchedState);
     });
 };
-
-//     .then((response) => parser(response))
-//     .then((rss) => {
-//       const feed = createFeed(rss.feed, value);
-//       const posts = createPost(rss.posts);
-//       watchedState.feeds.unshift(feed);
-//       watchedState.posts = posts.concat(watchedState.posts);
-//     })
-//     .then(() => {
-//       watchedState.form.valid = 'valid';
-//       watchedState.form.addedLinks.push(value);
-//       watchedState.form.status = 'sent';
-//       watchedState.form.field = value;
-//       updatePosts(watchedState, delay);
-//     })
-//     .catch((error) => {
-//       watchedState.form.valid = 'invalid';
-//       if (error.message === 'Network Error') {
-//         watchedState.errors = i18Instance.t('errors.networkError');
-//       } else if (error.message === 'invalidUrl') {
-//         watchedState.errors = i18Instance.t('errors.invalidUrl');
-//       } else {
-//         watchedState.errors = error.message;
-//       }
-//       watchedState.form.status = 'failed';
-//     })
-//     .finally(() => {
-//       watchedState.form.process = 'filling';
-//     });
-// });
-
-//   elements.posts.addEventListener('click', (e) => {
-//     const idClick = e.target.dataset.id;
-//     if (idClick) {
-//       const selectPost = watchedState.posts.find((post) => idClick === post.id);
-//       if (selectPost) {
-//         watchedState.activePost = selectPost.id;
-//         watchedState.readPost.push(selectPost);
-//       }
-//     }
-//   });
-// };
 
 export default app;

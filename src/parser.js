@@ -1,6 +1,10 @@
-export default (request) => {
+const parse = (request) => {
   const parser = new DOMParser();
-  const doc = parser.parseFromString(request.data.contents, 'application/xml');
+  const document = parser.parseFromString(request.data.contents, 'application/xml');
+  const rss = document.querySelector('rss');
+  if (!document.contains(rss)) {
+    const error = new Error()
+  }
 
   const errorNode = doc.querySelector('parsererror');
   if (errorNode) {
@@ -26,3 +30,5 @@ export default (request) => {
     return Promise.resolve(rss);
   }
 };
+
+export default parse;
