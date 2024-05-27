@@ -2,13 +2,12 @@ import { uniqueId } from 'lodash';
 
 const parse = (request) => {
   const parser = new DOMParser();
-  const document = parser.parseFromString(request.data.contents, 'application/xml');
+  const document = parser.parseFromString(request, 'application/xml');
   const rss = document.querySelector('rss');
   if (!document.contains(rss)) {
-    const parseError = new Error('parse error');
-    if (parseError) {
-      throw new Error('invalidUrl');
-    }
+    const error = new Error('parse error');
+    error.isParserError = true;
+    throw error;
   }
 
   const feed = {};
@@ -16,7 +15,7 @@ const parse = (request) => {
   feed.description = rss.querySelector('description').textContent;
 
   const itemElements = document.querySelectorAll('item');
-  const posts = [...itemElements].map((item) => {
+  const posts = Array.from(itemElements).map((item) => {
     const post = {};
     const title = item.querySelector('title');
     const link = item.querySelector('link');
