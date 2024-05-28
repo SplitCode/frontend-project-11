@@ -1,25 +1,22 @@
-import onChange from 'on-change';
-import * as yup from 'yup';
 import axios from 'axios';
+import * as yup from 'yup';
 import i18next from 'i18next';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import parse from './parser.js';
-import urlBuilder from './helpers.js';
-// import watch from './view.js';
-import updateUI from './view.js';
+import urlBuilder from './utils.js';
+import watch from './view.js';
 
 const delay = 5000;
-const timeout = 10000;
 
 const initialState = {
   form: {
-    error: '',
     status: '',
+    error: '',
   },
   loadingProcess: {
-    error: '',
     status: '',
+    error: '',
   },
   feeds: [],
   posts: [],
@@ -29,16 +26,13 @@ const initialState = {
   },
 };
 
-// const getAxiosResponse = (link) => {
-//   const url = urlBuilder(link);
-//   return axios.get(url, { timeout: 10000 });
-// };
+const fetchData = (url) => axios.get(urlBuilder(url), { timeout: 1000 });
 
-const errorMessages = (error) => {
-  if (error.isAxiosError) {
+const handleLoadingError = (error) => {
+  if (axios.isAxiosError(error)) {
     return 'networkError';
   }
-  if (error.isParserError) {
+  if (error.message === 'Parse error: invalid RSS') {
     return 'invalidUrl';
   }
   return 'unknownError';
@@ -46,15 +40,17 @@ const errorMessages = (error) => {
 
 const updatePosts = (watchedState) => {
   const { feeds } = watchedState;
-
-  const promises = feeds.map((feed) => axios.get(urlBuilder(feed.url), timeout)
+  const promises = feeds.map((feed) => fetchData(feed.url)
     .then((response) => {
       const { posts } = parse(response.data.contents);
       const newPosts = posts
         .filter((post) => !watchedState.posts.some((item) => item.title === post.title));
       watchedState.posts.unshift(...newPosts);
     })
-    .catch(() => {}));
+    .catch((error) => {
+      console.error(handleLoadingError(error));
+    }));
+
   Promise.all(promises)
     .then(() => {
       setTimeout(() => updatePosts(watchedState), delay);
@@ -63,7 +59,7 @@ const updatePosts = (watchedState) => {
 
 const loadRss = (watchedState, url) => {
   const { loadingProcess } = watchedState;
-  axios.get(urlBuilder(url), timeout)
+  fetchData(url)
     .then((response) => {
       const { feed, posts } = parse(response.data.contents);
       feed.id = uniqueId();
@@ -77,7 +73,7 @@ const loadRss = (watchedState, url) => {
       watchedState.posts.unshift(...postsWithFeedId);
     })
     .catch((error) => {
-      loadingProcess.error = errorMessages(error);
+      loadingProcess.error = handleLoadingError(error);
       loadingProcess.status = 'failed';
     });
 };
@@ -86,38 +82,36 @@ const validateUrl = (url, urls) => {
   const schema = yup.string().url('errorUrl').required('emptyUrl').notOneOf(urls, 'doubleUrl');
   return schema
     .validate(url)
-    .then(() => null)
+    .then(() => { })
     .catch((error) => error);
 };
 
 const app = () => {
   const elements = {
     form: document.querySelector('.rss-form'),
-    input: document.querySelector('.rss-form input'),
-    submitButton: document.querySelector('button[type="submit"]'),
+    input: document.getElementById('url-input'),
+    submitButton: document.querySelector('[type="submit"]'),
     feedback: document.querySelector('.feedback'),
     postsSection: document.querySelector('.posts'),
     feedsSection: document.querySelector('.feeds'),
     modal: document.querySelector('.modal'),
   };
 
-  const i18Inst = i18next.createInstance();
-  i18Inst.init({
+  const i18n = i18next.createInstance();
+  i18n.init({
+    debug: false,
     lng: 'ru',
-    debug: true,
     resources: {
       ru,
     },
   }).then(() => {
-    // const watchedState = watch(initialState, i18Inst, elements);
-    const watchedState = onChange(initialState, updateUI(initialState, i18Inst, elements));
-    elements.form.addEventListener('submit', (e) => {
+    const watchedState = watch(initialState, i18n, elements);
+    elements.form.addEventListener('submit', ((e) => {
       e.preventDefault();
-      const formData = new FormData(e.target);
-      const url = formData.get('url');
-      watchedState.form.status = 'processing'; // sending
+      const data = new FormData(e.target);
+      const url = data.get('url');
+      watchedState.form.status = 'processing';
       const urls = watchedState.feeds.map((feed) => feed.url);
-
       validateUrl(url, urls).then((error) => {
         if (error) {
           watchedState.form.error = error.message;
@@ -127,8 +121,7 @@ const app = () => {
         watchedState.form.error = '';
         loadRss(watchedState, url);
       });
-    });
-
+    }));
     elements.postsSection.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
       if (id) {
@@ -136,7 +129,6 @@ const app = () => {
         watchedState.ui.readPosts.add(id);
       }
     });
-
     updatePosts(watchedState);
   });
 };

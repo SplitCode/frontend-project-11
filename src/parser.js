@@ -5,17 +5,13 @@ const parse = (request) => {
   const document = parser.parseFromString(request, 'application/xml');
   const rss = document.querySelector('rss');
   if (!document.contains(rss)) {
-    const error = new Error('parse error');
-    error.isParserError = true;
-    throw error;
+    throw new Error('Parse error: invalid RSS');
   }
-
   const feed = {};
   feed.title = rss.querySelector('title').textContent;
   feed.description = rss.querySelector('description').textContent;
-
-  const itemElements = document.querySelectorAll('item');
-  const posts = Array.from(itemElements).map((item) => {
+  const items = document.querySelectorAll('item');
+  const posts = Array.from(items).map((item) => {
     const post = {};
     const title = item.querySelector('title');
     const link = item.querySelector('link');
@@ -26,7 +22,6 @@ const parse = (request) => {
     post.id = uniqueId();
     return post;
   });
-
   return { feed, posts };
 };
 
