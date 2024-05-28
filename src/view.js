@@ -115,6 +115,7 @@ const startLoadingProcess = (state, elements, i18n, value) => {
       feedback.textContent = i18n.t('successUrl');
       submitButton.removeAttribute('disabled');
       input.removeAttribute('disabled');
+      input.classList.replace('is-invalid', 'is-valid');
       feedback.classList.remove('text-danger');
       feedback.classList.add('text-success');
       input.value = '';
