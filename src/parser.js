@@ -5,7 +5,9 @@ const parse = (request) => {
   const document = parser.parseFromString(request, 'application/xml');
   const rss = document.querySelector('rss');
   if (!document.contains(rss)) {
-    throw new Error('Parse error: invalid RSS');
+    const error = new Error('Parse error: invalid RSS');
+    error.isParserError = true;
+    throw error;
   }
   const feed = {};
   feed.title = rss.querySelector('title').textContent;

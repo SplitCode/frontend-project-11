@@ -32,7 +32,7 @@ const handleLoadingError = (error) => {
   if (axios.isAxiosError(error)) {
     return 'networkError';
   }
-  if (error.message === 'Parse error: invalid RSS') {
+  if (error.isParserError) {
     return 'invalidUrl';
   }
   return 'unknownError';
