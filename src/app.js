@@ -8,6 +8,9 @@ import urlBuilder from './utils.js';
 import watch from './view.js';
 
 const delay = 5000;
+const axiosConfig = {
+  timeout: 10000,
+};
 
 const initialState = {
   form: {
@@ -26,7 +29,7 @@ const initialState = {
   },
 };
 
-const fetchData = (url) => axios.get(urlBuilder(url), { timeout: 1000 });
+const fetchData = (url) => axios.get(urlBuilder(url), axiosConfig);
 
 const handleLoadingError = (error) => {
   if (axios.isAxiosError(error)) {
