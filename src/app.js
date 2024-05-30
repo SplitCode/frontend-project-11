@@ -4,7 +4,7 @@ import i18next from 'i18next';
 import { uniqueId } from 'lodash';
 import ru from './locales/ru.js';
 import parse from './parser.js';
-import urlBuilder from './utils.js';
+import { urlBuilder } from './utils.js';
 import watch from './view.js';
 
 const delay = 5000;

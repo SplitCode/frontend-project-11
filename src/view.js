@@ -1,5 +1,5 @@
 import onChange from 'on-change';
-import { createButton, createItem } from './helpers.js';
+import { createButton, createItem } from './utils.js';
 
 const createCardContainer = (title) => {
   const card = document.createElement('div');
