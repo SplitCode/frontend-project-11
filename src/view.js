@@ -106,7 +106,7 @@ const handleFormStatus = (state, elements, i18n, value) => {
   }
 };
 
-const startLoadingProcess = (state, elements, i18n, value) => {
+const handleLoadingProcess = (state, elements, i18n, value) => {
   const { loadingProcess } = state;
   const { feedback, input, submitButton } = elements;
 
@@ -141,7 +141,7 @@ const updateUI = (state, i18n, elements) => (path, value) => {
       handleFormStatus(state, elements, i18n, value);
       break;
     case 'loadingProcess.status':
-      startLoadingProcess(state, elements, i18n, value);
+      handleLoadingProcess(state, elements, i18n, value);
       break;
     case 'feeds':
       createFeedsList(state, i18n, elements);
