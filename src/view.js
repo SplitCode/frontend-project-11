@@ -106,11 +106,9 @@ const handleFormStatus = (state, elements, i18n, value) => {
       break;
     case 'failed':
       feedback.textContent = i18n.t(form.error);
-      unblockForm(input, submitButton);
       feedback.classList.add('text-danger');
       input.classList.add('is-invalid');
-      input.removeAttribute('disabled');
-      submitButton.removeAttribute('disabled');
+      unblockForm(input, submitButton);
       break;
     case 'success':
       unblockForm(input, submitButton);
