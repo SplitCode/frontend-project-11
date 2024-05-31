@@ -62,6 +62,7 @@ const updatePosts = (watchedState) => {
 
 const loadRss = (watchedState, url) => {
   const { loadingProcess } = watchedState;
+  loadingProcess.status = 'loading';
   fetchData(url)
     .then((response) => {
       const { feed, posts } = parse(response.data.contents);
@@ -122,6 +123,7 @@ const app = () => {
           return;
         }
         watchedState.form.error = '';
+        watchedState.form.status = 'success';
         loadRss(watchedState, url);
       });
     }));

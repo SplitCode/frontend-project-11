@@ -101,6 +101,11 @@ const handleFormStatus = (state, elements, i18n, value) => {
       input.removeAttribute('disabled');
       submitButton.removeAttribute('disabled');
       break;
+    case 'success':
+      input.removeAttribute('disabled');
+      submitButton.removeAttribute('disabled');
+      feedback.textContent = '';
+      break;
     default:
       break;
   }
@@ -111,6 +116,13 @@ const handleLoadingProcess = (state, elements, i18n, value) => {
   const { feedback, input, submitButton } = elements;
 
   switch (value) {
+    case 'loading':
+      input.setAttribute('disabled', '');
+      submitButton.setAttribute('disabled', '');
+      feedback.textContent = '';
+      feedback.classList.remove('text-danger');
+      input.classList.remove('is-invalid');
+      break;
     case 'success':
       feedback.textContent = i18n.t('successUrl');
       submitButton.removeAttribute('disabled');
@@ -121,7 +133,6 @@ const handleLoadingProcess = (state, elements, i18n, value) => {
       input.value = '';
       input.focus();
       break;
-
     case 'failed':
       feedback.textContent = i18n.t(loadingProcess.error);
       feedback.classList.add('text-danger');
@@ -129,7 +140,6 @@ const handleLoadingProcess = (state, elements, i18n, value) => {
       input.removeAttribute('disabled');
       submitButton.removeAttribute('disabled');
       break;
-
     default:
       break;
   }
