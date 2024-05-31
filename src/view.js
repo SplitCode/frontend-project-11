@@ -82,28 +82,38 @@ const createModalWindow = (state, elements) => {
   linkButton.setAttribute('href', openedPost.link);
 };
 
+const blockForm = (input, submitButton, feedbackEl) => {
+  const feedback = feedbackEl;
+  input.setAttribute('disabled', '');
+  submitButton.setAttribute('disabled', '');
+  feedback.textContent = '';
+  feedback.classList.remove('text-danger');
+  input.classList.remove('is-invalid');
+};
+
+const unblockForm = (input, submitButton) => {
+  input.removeAttribute('disabled');
+  submitButton.removeAttribute('disabled');
+};
+
 const handleFormStatus = (state, elements, i18n, value) => {
   const { form } = state;
   const { input, submitButton, feedback } = elements;
 
   switch (value) {
     case 'processing':
-      input.setAttribute('disabled', '');
-      submitButton.setAttribute('disabled', '');
-      feedback.textContent = '';
-      feedback.classList.remove('text-danger');
-      input.classList.remove('is-invalid');
+      blockForm(input, submitButton, feedback);
       break;
     case 'failed':
       feedback.textContent = i18n.t(form.error);
+      unblockForm(input, submitButton);
       feedback.classList.add('text-danger');
       input.classList.add('is-invalid');
       input.removeAttribute('disabled');
       submitButton.removeAttribute('disabled');
       break;
     case 'success':
-      input.removeAttribute('disabled');
-      submitButton.removeAttribute('disabled');
+      unblockForm(input, submitButton);
       feedback.textContent = '';
       break;
     default:
@@ -117,16 +127,11 @@ const handleLoadingProcess = (state, elements, i18n, value) => {
 
   switch (value) {
     case 'loading':
-      input.setAttribute('disabled', '');
-      submitButton.setAttribute('disabled', '');
-      feedback.textContent = '';
-      feedback.classList.remove('text-danger');
-      input.classList.remove('is-invalid');
+      blockForm(input, submitButton, feedback);
       break;
     case 'success':
       feedback.textContent = i18n.t('successUrl');
-      submitButton.removeAttribute('disabled');
-      input.removeAttribute('disabled');
+      unblockForm(input, submitButton);
       input.classList.replace('is-invalid', 'is-valid');
       feedback.classList.remove('text-danger');
       feedback.classList.add('text-success');
@@ -137,8 +142,7 @@ const handleLoadingProcess = (state, elements, i18n, value) => {
       feedback.textContent = i18n.t(loadingProcess.error);
       feedback.classList.add('text-danger');
       input.classList.add('is-invalid');
-      input.removeAttribute('disabled');
-      submitButton.removeAttribute('disabled');
+      unblockForm(input, submitButton);
       break;
     default:
       break;
